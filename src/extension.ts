@@ -1,72 +1,50 @@
 import * as vscode from 'vscode';
-import { LocalStorageService } from './LocalStorageService';
-import { formatDuration } from './utils';
-
-// TODO: Icon in notification text?
-// TODO: Add option to set real desktop notification
 
 export function activate(context: vscode.ExtensionContext) {
-  let durationObj: Duration = {} as Duration;
-  const storageManager = new LocalStorageService(context.workspaceState);
-
-  const showProgressBar = (name: string, durationObj: Duration) => {
-    const msg = `Task\n"${name}"\nwill take ${formatDuration(
-      durationObj.calcNextDuration
-    )} ⌛`;
+  const sec = 1000
+  const showNotification = (msg: string, timeout: number, cancellable: boolean = false, progressbar: boolean = false) => {
     vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
         title: msg,
-        cancellable: true,
+        cancellable: cancellable,
       },
-      (progress, token) => {
-        const stepSize = Math.trunc(durationObj.calcNextDuration / 10);
+      async (progress, token) => {
+        return new Promise<void>(resolve => {
+          setTimeout(() => { resolve() }, timeout)
 
-        return Promise.all(
-          Array(9)
-            .fill(0)
-            .map((e, i) => {
-              return new Promise(resolve => setTimeout(() => {
-                progress.report({ increment: 10 * (i + 1) });
-                resolve();
-              }, stepSize * (i + 1)));
-            }));
+          if (progressbar) {
+            for (let i = 0; i < 100; i++) {
+              let timer = i * 0.01 * timeout
+              setTimeout(() => { progress.report({ increment: 1 }) }, timer)
+            }
+          }
+        })
       }
-    );
-  };
+    )
+  }
+  const onEndTask = (name: string) => {
+    const config = vscode.workspace.getConfiguration("tasknotify-fork");
+    const type = config.type;
+    const timeout = config.timeout * sec;
+    const msg = `Task "${name}" is done ✔️`
 
-  const taskStarted = vscode.tasks.onDidStartTask((e) => {
-    durationObj.startTime = new Date();
-    storageManager.setValue<any>(`taskDuration-${e.execution.task.name}`, durationObj);
+    if (type === 'notification') showNotification(msg, timeout, config.notification.cancellable, config.notification.progress)
+    else if (type === 'statusbar') vscode.window.setStatusBarMessage(msg, timeout);
+  }
 
-    if (durationObj.calcNextDuration) {
-      showProgressBar(e.execution.task.name, durationObj);
-    } else {
-      vscode.window.showInformationMessage(
-        `Task\n"${e.execution.task.name}"\nis started 🏃🏻‍♂️`
-      );
-    }
+  const taskProcessEnd = vscode.tasks.onDidEndTaskProcess((e) => {
+    if (e.exitCode != 0) return
+
+    onEndTask(e.execution.task.name);
+  });
+  const taskEnd = vscode.tasks.onDidEndTask((e) => {
+    if (typeof e.execution.task.execution !== undefined) return
+
+    onEndTask(e.execution.task.name);
   });
 
-  const taskEnden = vscode.tasks.onDidEndTask((e) => {
-    durationObj = storageManager.getValue<any>(`taskDuration-${e.execution.task.name}`);
-
-    durationObj.endTime = new Date();
-    durationObj.currentDuration =
-      durationObj.endTime.valueOf() - durationObj.startTime.valueOf();
-    if (!durationObj.lastDuration) {
-      durationObj.lastDuration = durationObj.currentDuration;
-    }
-
-    durationObj.lastDuration =
-      (durationObj.currentDuration + durationObj.lastDuration) / 2;
-    durationObj.calcNextDuration = durationObj.lastDuration;
-
-    storageManager.setValue<any>(`taskDuration-${e.execution.task.name}`, durationObj);
-    vscode.window.showInformationMessage(`Task\n"${e.execution.task.name}"\nis done ✔️`);
-  });
-
-  context.subscriptions.push(taskStarted, taskEnden);
+  context.subscriptions.push(taskProcessEnd, taskEnd);
 }
 
 export function deactivate() { }

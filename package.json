@@ -1,9 +1,9 @@
 {
-	"name": "tasknotify",
-	"displayName": "TaskNotify",
+	"name": "tasknotify-fork",
+	"displayName": "TaskNotify (Fork)",
 	"description": "Get notifications when you vscode task is done",
-	"version": "0.0.2",
-	"publisher": "lwluc",
+	"version": "0.0.1",
+	"publisher": "SR_team",
 	"engines": {
 		"vscode": "^1.47.0"
 	},
@@ -16,12 +16,52 @@
 		"Other"
 	],
 	"activationEvents": [
-		"*"
+		"workspaceContains:.vscode/tasks.json"
 	],
 	"main": "./out/extension.js",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/lwluc/tasknotify.git"
+	},
+	"contributes": {
+		"configuration": {
+			"type": "object",
+			"title": "TaskNotify (fork) configuration",
+			"properties": {
+				"tasknotify-fork.type": {
+					"type": "string",
+					"description": "Choose between vsCode message in the status bar or notification",
+					"default": "notification",
+					"scope": "resource",
+					"enum": [
+						"statusbar",
+						"notification"
+					],
+					"enumDescriptions": [
+						"Message in vsCode status bar",
+						"(default) Vscode notification"
+					]
+				},
+				"tasknotify-fork.timeout": {
+					"type": "integer",
+					"description": "Time to show notification",
+					"default": 10,
+					"scope": "resource"
+				},
+				"tasknotify-fork.notification.cancellable": {
+					"type": "boolean",
+					"description": "Show cancel button to hide notification",
+					"default": true,
+					"scope": "resource"
+				},
+				"tasknotify-fork.notification.progress": {
+					"type": "boolean",
+					"description": "Show progress bar of show notification",
+					"default": true,
+					"scope": "resource"
+				}
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
@@ -30,15 +70,15 @@
 		"watch": "tsc -watch -p ./"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.47.0",
 		"@types/glob": "^7.1.3",
 		"@types/mocha": "^8.0.0",
 		"@types/node": "^14.0.27",
-		"eslint": "^7.6.0",
+		"@types/vscode": "^1.47.0",
 		"@typescript-eslint/eslint-plugin": "^3.8.0",
 		"@typescript-eslint/parser": "^3.8.0",
+		"eslint": "^7.6.0",
 		"glob": "^7.1.6",
-		"mocha": "^8.0.1",
+		"mocha": "^10.2.0",
 		"typescript": "^3.8.3"
 	}
 }
