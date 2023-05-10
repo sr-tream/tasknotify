@@ -2,7 +2,7 @@
 	"name": "tasknotify-fork",
 	"displayName": "TaskNotify (Fork)",
 	"description": "Get notifications when you vscode task is done",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"publisher": "SR-team",
 	"engines": {
 		"vscode": "^1.47.0"
@@ -16,12 +16,12 @@
 		"Other"
 	],
 	"activationEvents": [
-		"workspaceContains:.vscode/tasks.json"
+		"onStartupFinished"
 	],
 	"main": "./out/extension.js",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/lwluc/tasknotify.git"
+		"url": "https://github.com/sr-tream/tasknotify.git"
 	},
 	"contributes": {
 		"configuration": {

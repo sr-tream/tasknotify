@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.0.2]
+
+- Fix extension URL
+- Fix activate extension, when present only global tasks
+
 ## [0.0.1]
 
 ### Create fork:
