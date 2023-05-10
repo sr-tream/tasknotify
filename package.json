@@ -3,7 +3,7 @@
 	"displayName": "TaskNotify (Fork)",
 	"description": "Get notifications when you vscode task is done",
 	"version": "0.0.1",
-	"publisher": "SR_team",
+	"publisher": "SR-team",
 	"engines": {
 		"vscode": "^1.47.0"
 	},
